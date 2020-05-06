@@ -28,7 +28,7 @@ typedef struct Arg {
 #define NO_PARAMS 0
 #define HAS_SS 1*1
 #define HAS_DD 1*2
-#define HAS_SS_AND_DD 1*2+1*1
+#define HAS_SS_AND_DD (HAS_DD|HAS_SS)
 
 typedef struct {
     word mask;

@@ -71,6 +71,7 @@ Arg get_mr(word w) {
 	Arg res;
 	int r = w & 7;
 	int m = (w >> 3) & 7;
+	way = to_mem;
 	switch (m) {
 		case 0: //R0
 			res.adr = r;
