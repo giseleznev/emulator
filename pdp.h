@@ -5,11 +5,9 @@ typedef unsigned char byte; // 8 bit
 typedef unsigned short int word; //16 bit
 typedef word adr; //16 bit
 
-word reg[8];
 
 #define MEMSIZE (64*1024)
 
-byte mem[MEMSIZE];
 void b_write(adr adr, byte b);
 byte b_read(adr adr);
 void w_write(adr adr, word w, int way);
@@ -19,7 +17,6 @@ void test_mem();
 #define to_register (0)
 #define to_mem (1)
 
-#define pc reg[7]
 
 void check_reg();
 
@@ -29,10 +26,10 @@ typedef struct Arg {
     word adr;
 } Arg;
 
-#define no_params 0
-#define has_ss 1
-#define has_dd 2
-#define has_ss_and_dd 3
+#define NO_PARAMS 0
+#define HAS_SS 1*1
+#define HAS_DD 1*2+1*1
+#define HAS_SS_AND_DD 1*2+1*1
 
 typedef struct {
     word mask;

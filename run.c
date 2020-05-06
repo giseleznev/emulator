@@ -3,10 +3,14 @@
 #include <string.h>
 #include <stdlib.h>
 
+extern word reg[8];
+extern byte mem[MEMSIZE];
+#define pc reg[7]
+
 Command cmd[] = {
-        {0170000, 0000000, "halt", do_halt, has_ss_and_dd},
-        {0170000, 0010000, "mov", do_mov, has_ss_and_dd},
-        {0170000, 0060000, "add", do_add, has_ss_and_dd},
+        {0170000, 0000000, "halt", do_halt, HAS_SS_AND_DD},
+        {0170000, 0010000, "mov", do_mov, HAS_SS_AND_DD},
+        {0170000, 0060000, "add", do_add, HAS_SS_AND_DD},
 };
 
 void load_file (char* path) {
@@ -21,16 +25,16 @@ void load_file (char* path) {
 	int n;
 	int test = 0;
 	while(1) {
-		if (fscanf(S, "%hx", &adress) != EOF) {
+		if (fscanf(S, "%hx", &adress) != 0) {
 			test++;
-			if (!((0 <= adress)&&(adress <= 64*1024))){ 
-					fprintf (stderr, "Invalid data, wrong adress!/n");
+			if (!((0 <= adress)&&(adress <= MEMSIZE))){ 
+					fprintf (stderr, "Invalid data, wrong adress!\n");
 					exit(3);
 				};
 			fscanf(S, "%x", &n);
 			for ( i = 0; i < n; i ++) {
 				if (fscanf(S, "%hhx", &b) == 0){ 
-					fprintf (stderr, "Invalid data, too few bits written!/n");
+					fprintf (stderr, "Invalid data, too few bits written!\n");
 					exit(3);
 				};
 				b_write(adress + i, b);
@@ -38,7 +42,7 @@ void load_file (char* path) {
 		}
 		else {
 			if (!test) {
-				fprintf (stderr, "Invalid data, nothing was read!/n");
+				fprintf (stderr, "Invalid data, nothing was read!\n");
 				exit(3);
 			}
 			break;
@@ -64,10 +68,10 @@ void run () {
         pc += 2; 
         for (unsigned int i = 0; i < sizeof(cmd)/sizeof(cmd[0]); i++ ) {
              if ( (w & cmd[i].mask) == cmd[i].opcore) {
-				 if ((cmd[i].params & 1) == has_ss) {
+				 if ((cmd[i].params) & (HAS_SS)) {
 					ss = get_mr(w >> 6);
 				 }
-				 if ((cmd[i].params & 2) == has_dd) {
+				 if ((cmd[i].params) & (HAS_DD) ){
 					dd = get_mr(w);
 				 }
                  cmd[i].do_func();
@@ -78,6 +82,11 @@ void run () {
 }
 
 int main(int argc, char **argv) {
+	/*
+	if(argv[1] == NULL){
+		printf("Invalid command! \nput the file path after programm name\nwrite: ./programme path to a file \n");
+		return 1;
+	}*/
 	load_file(argv[1]);
 	run();
 	return 0;

@@ -3,6 +3,11 @@
 #include <assert.h>
 #include <stdlib.h>
 
+word reg[8];
+byte mem[MEMSIZE];
+
+
+
 int way = to_mem;
 
 void test_mem () {
@@ -94,7 +99,7 @@ Arg get_mr(word w) {
 		break;
 			
 		default:
-			fprintf (stderr, "Mode %o NOT IMPLEMENTED yet!/n", m);
+			fprintf (stderr, "Mode %o NOT IMPLEMENTED yet!\n", m);
 			exit(1); 
 	}
 	return res;
