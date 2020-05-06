@@ -6,8 +6,6 @@
 word reg[8];
 byte mem[MEMSIZE];
 
-
-
 int way = to_mem;
 
 void test_mem () {

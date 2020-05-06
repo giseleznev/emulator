@@ -22,10 +22,10 @@ void load_file (char* path) {
 	int i;
 	adr adress;
 	byte b;
-	int n;
+	int x,n;
 	int test = 0;
 	while(1) {
-		if (fscanf(S, "%hx", &adress) != 0) {
+		if ((x = fscanf(S, "%hx", &adress) != EOF) && (x != 0)) {
 			test++;
 			if (!((0 <= adress)&&(adress <= MEMSIZE))){ 
 					fprintf (stderr, "Invalid data, wrong adress!\n");
@@ -82,11 +82,10 @@ void run () {
 }
 
 int main(int argc, char **argv) {
-	/*
 	if(argv[1] == NULL){
 		printf("Invalid command! \nput the file path after programm name\nwrite: ./programme path to a file \n");
 		return 1;
-	}*/
+	}
 	load_file(argv[1]);
 	run();
 	return 0;

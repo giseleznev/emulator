@@ -5,7 +5,6 @@ typedef unsigned char byte; // 8 bit
 typedef unsigned short int word; //16 bit
 typedef word adr; //16 bit
 
-
 #define MEMSIZE (64*1024)
 
 void b_write(adr adr, byte b);
@@ -28,7 +27,7 @@ typedef struct Arg {
 
 #define NO_PARAMS 0
 #define HAS_SS 1*1
-#define HAS_DD 1*2+1*1
+#define HAS_DD 1*2
 #define HAS_SS_AND_DD 1*2+1*1
 
 typedef struct {
