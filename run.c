@@ -1,37 +1,55 @@
 #include "pdp1.h"
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
-void load_file() {
-	FILE *S;
-	S = fopen("t.txt", "r");
+void load_file (char* path) {
+    FILE * S  = fopen(path, "r");   
+    if (S == NULL) {
+        perror(path);
+        fprintf (stderr, "file is NULL!/n");
+		exit(2);
+    }
 	int i;
 	adr adress;
-	word w;
+	byte b;
 	int n;
+	int test = 0;
 	while(1) {
-		if (fscanf(S, "%hx", &adress) != EOF ) {
+		if (fscanf(S, "%hx", &adress) != EOF) {
+			test++;
+			if (!((0 <= adress)&&(adress <= 1024))){ 
+					fprintf (stderr, "Invalid data, wrong adress!/n");
+					exit(3);
+				};
 			fscanf(S, "%x", &n);
 			for ( i = 0; i < n; i ++) {
-				fscanf(S, "%ho", &w);
-		//		printf("%06ho \n", w);
-				w_write(adress, w, 1);
-				adress += 2;
+				if (fscanf(S, "%hhx", &b) == 0){ 
+					fprintf (stderr, "Invalid data, too few bits written!/n");
+					exit(3);
+				};
+				b_write(adress + i, b);
 			}
 		}
-		else break;
+		else {
+			if (!test) {
+				fprintf (stderr, "Invalid data, nothing was read!/n");
+				exit(3);
+			}
+			break;
+		}
 	}
 }
+
 
 void mem_dump(adr start, word n) {
 	adr adress;
-	for(int i = 0; i < 2*n; i +=2 ) {
+	for(int i = 0; i < n; i += 2) {
 		word w = w_read(start + i);
 		adress = start + i;
-		printf("%06ho : %06ho \n", adress, w);
+		printf("%06o : %06o \n", adress, w);
 	}
 }
-
 void run () {
     pc = 01000; // это слово, поэтому   = ___0 1000
     while(1) {
@@ -49,8 +67,8 @@ void run () {
     }
 }
 
-int main() {
-	load_file();
+int main(int argc, char **argv) {
+	load_file(argv[1]);
 	run();
 	return 0;
 }

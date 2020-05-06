@@ -1,11 +1,13 @@
 #include <stdlib.h>
 #include "pdp.h"
 
+#define to_register (0)
+#define to_mem (1)
 
 #define pc reg[7]
 
 void check_reg() {
-    for (int i = 0; i <= 7; i++ ) {
+    for (int i = 0; i < 8; i++ ) {
         printf(" R%d, %06ho ", i, reg[i]);
     }
 }
@@ -23,7 +25,7 @@ typedef struct {
 } Command;
 
 Arg ss, dd;
-int way = 1;
+int way = to_mem;
 
 Arg get_mr(word w) {
 	Arg res;
@@ -34,7 +36,7 @@ Arg get_mr(word w) {
 			res.adr = r;
 			res.val = reg[r];
 			printf("R%o ", r);
-			way = 0;
+			way = to_register;
 			break;
 		case 1: // (R3)
 			res.adr =reg[r];

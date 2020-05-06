@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <assert.h>
-#define re (0)
-#define me (1)
 
 typedef unsigned char byte; // 8 bit
 typedef unsigned short int word; //16 bit
