@@ -8,10 +8,11 @@
 extern word reg[8];
 extern byte mem[MEMSIZE];
 extern Arg ss, dd;
-extern int NN, R;
+extern int NN, R, B;
 
 Command cmd[] = {
         {0170000, 0010000, "mov", do_mov, (HAS_SS|HAS_DD)},
+        {0170000, 0110000, "movb", do_movb, (HAS_B|HAS_SS|HAS_DD)},
         {0170000, 0060000, "add", do_add, (HAS_SS|HAS_DD)},
         {0177000, 0077000, "SOB", do_SOB, (HAS_R|HAS_NN)},
         {0177700, 0005000, "clear", do_clear, (HAS_DD)},
@@ -42,7 +43,7 @@ void load_file (char* path) {
 					fprintf (stderr, "Invalid data, too few bits written!\n");
 					exit(3);
 				};
-				b_write(adress + i, b);
+				b_write(adress + i, b, to_mem);
 			}
 		}
 		else {
@@ -70,11 +71,15 @@ void run () {
     while(1) {
         word w = w_read(pc);
         printf ("%06o %06o: ", pc, w); // шесть восьмеричных значений   машинное слово: 0.100 .000.0 00.00 0.000
-        pc += 2; 
+        pc += 2;
+        check_reg();
         for (unsigned int i = 0; i < sizeof(cmd)/sizeof(cmd[0]); i++ ) {
              if ( (w & cmd[i].mask) == cmd[i].opcore) {
+				 if ((cmd[i].params) & (HAS_B)) {
+					B = 1;
+				 }
 				 if ((cmd[i].params) & (HAS_SS)) {
-					ss = get_mr(w >> 6);
+					ss = get_mr(w >> 6);	
 				 }
 				 if ((cmd[i].params) & (HAS_DD) ){
 					dd = get_mr(w);
@@ -99,8 +104,6 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 	load_file(argv[1]);
-	mem_dump(0x0040, 0x000a); //
-	mem_dump(0x0200, 0x0012);
 	run();
 	return 0;
 }

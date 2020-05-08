@@ -8,7 +8,7 @@ typedef word adr; //16 bit
 
 #define MEMSIZE (64*1024)
 
-void b_write(adr adr, byte b);
+void b_write(adr adr, byte b, int way);
 byte b_read(adr adr);
 void w_write(adr adr, word w, int way);
 word w_read(adr adr);
@@ -31,7 +31,7 @@ typedef struct Arg {
 #define HAS_DD 2
 #define HAS_NN 4
 #define HAS_R 8
-
+#define HAS_B 16
 
 typedef struct {
     word mask;
@@ -46,6 +46,7 @@ int get_NN(word w);
 int get_R(word w);
 
 void do_mov();
+void do_movb();
 void do_add();
 void do_halt();
 void do_clear();

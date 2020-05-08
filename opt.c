@@ -13,11 +13,12 @@ int way = to_mem;
 
 Arg ss, dd;
 int NN, R;
+int B = 0;
 
 void test_mem () {
     byte b0 = 0x0a;
 //пишем байт, читаем байт
-    b_write(2, b0);
+    b_write(2, b0, to_mem);
     byte bres = b_read(2);
     printf("bw/br \t  %hhx = %hhx\n", b0, bres);
     assert(b0 == bres);
@@ -26,8 +27,8 @@ void test_mem () {
     byte b1 = 0xcb;
     b0 = 0x0c;
     word w = 0xcb0c;
-    b_write (a, b0);
-    b_write (a+1, b1);
+    b_write (a, b0, to_mem);
+    b_write (a+1, b1, to_mem);
     word wres = w_read(a);
     printf("bw/wr \t %04hx = %02hhx%02hhx \n", wres, b1, b0);
     assert(w == wres);
@@ -44,8 +45,8 @@ void w_write (adr adr, word w, int way) {
 	if (way) {
     word b0 = ((byte) w);           //преобразование b0 = w & 0xFF
     word b1 =  ((byte) (w >> 8));   //преобразование (b0 = w >> 8) & 0xFF
-    b_write (adr, b0);
-    b_write (adr+1, b1);
+    b_write (adr, b0, to_mem);
+    b_write (adr+1, b1, to_mem);
 	}
 	else if (!way) {
 		reg[adr] = w;
@@ -59,8 +60,18 @@ word w_read (adr adr) {
     // нулевое значение считываем на первый бит
 }
 
-void b_write(adr adr, byte b){
-    mem[adr] = b;
+void b_write(adr adr, byte b, int way){
+    if (way) {
+		mem[adr] = b;
+	}
+	if (!way) {
+		if ((b >> 7)) {
+			reg[adr] = (0177400|b);
+		}
+		if (!(b >> 7)) {
+			reg[adr] = (0000377&b);
+		}
+	}
 }
 
 byte b_read(adr adr){
@@ -97,14 +108,24 @@ Arg get_mr(word w) {
 			break;
 		case 1: // (R3)
 			res.adr =reg[r];
-			res.val = w_read(res.adr); //b_read
+			if (!B){
+				res.val = w_read(res.adr);
+			}
+			if (B){
+				res.val = b_read(res.adr);
+			} //b_read
 			printf("(R%o) ", r);
 			break;
 		case 2: // (R3)+ #3
-			res.adr =reg[r];
-			res.val = w_read(res.adr); //b_read
-			
-			reg[r] += 2;
+			res.adr = reg[r];
+			if (!B){
+				res.val = w_read(res.adr);
+				reg[r] += 2;		
+			}
+			if (B){
+				res.val = b_read(res.adr);
+				reg[r] += 1;
+			} //b_read
 			if ( r == 7 ) {
 			printf("#%o ", res.val);
 		}	
@@ -123,6 +144,11 @@ Arg get_mr(word w) {
 void do_mov() {
 	printf ("mov");
 	w_write(dd.adr, ss.val, way);
+}
+
+void do_movb() {
+	printf ("movb");
+	b_write(dd.adr, ss.val, way);	
 }
 
 void do_add() {
