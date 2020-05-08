@@ -9,14 +9,16 @@ extern word reg[8];
 extern byte mem[MEMSIZE];
 extern Arg ss, dd;
 extern int NN, R, B;
+extern char flag_C, flag_N, flag_Z;
 
 Command cmd[] = {
-        {0170000, 0010000, "mov", do_mov, (HAS_SS|HAS_DD)},
-        {0170000, 0110000, "movb", do_movb, (HAS_B|HAS_SS|HAS_DD)},
-        {0170000, 0060000, "add", do_add, (HAS_SS|HAS_DD)},
-        {0177000, 0077000, "SOB", do_SOB, (HAS_R|HAS_NN)},
-        {0177700, 0005000, "clear", do_clear, (HAS_DD)},
-        {0170000, 0000000, "halt", do_halt, (NO_PARAMS)},
+        {0170000, 0010000, "mov", do_mov, (HAS_SS|HAS_DD), (CH_N|CH_Z|CH_C)},
+        {0170000, 0110000, "movb", do_movb, (HAS_B|HAS_SS|HAS_DD), (CH_N|CH_Z|CH_C)},
+        {0170000, 0060000, "add", do_add, (HAS_SS|HAS_DD), (CH_N|CH_Z|CH_C)},
+        {0177000, 0077000, "SOB", do_SOB, (HAS_R|HAS_NN), (NO_CH_N|NO_CH_Z|NO_CH_C)},
+        {0177700, 0005000, "clear", do_clear, (HAS_DD), (NO_CH_N|NO_CH_Z|NO_CH_C)},
+        {0170000, 0000000, "halt", do_halt, (NO_PARAMS), (NO_CH_N|NO_CH_Z|NO_CH_C)},
+        
 };
 
 void load_file (char* path) {
@@ -72,9 +74,10 @@ void run () {
         word w = w_read(pc);
         printf ("%06o %06o: ", pc, w); // шесть восьмеричных значений   машинное слово: 0.100 .000.0 00.00 0.000
         pc += 2;
-        check_reg();
+   //     check_reg();
         for (unsigned int i = 0; i < sizeof(cmd)/sizeof(cmd[0]); i++ ) {
              if ( (w & cmd[i].mask) == cmd[i].opcore) {
+				 printf("%s ", cmd[i].name);
 				 if ((cmd[i].params) & (HAS_B)) {
 					B = 1;
 				 }

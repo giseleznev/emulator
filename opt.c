@@ -5,6 +5,7 @@
 
 #define pc reg[7]
 
+
 word reg[8];
 byte mem[MEMSIZE];
 
@@ -14,6 +15,9 @@ int way = to_mem;
 Arg ss, dd;
 int NN, R;
 int B = 0;
+char flag_N = 0;
+char flag_Z = 0;
+char flag_C = 0;
 
 void test_mem () {
     byte b0 = 0x0a;
@@ -122,9 +126,17 @@ Arg get_mr(word w) {
 				res.val = w_read(res.adr);
 				reg[r] += 2;		
 			}
-			if (B){
+			else {
 				res.val = b_read(res.adr);
-				reg[r] += 1;
+				if ((r != 6) && (r != 7)){
+					reg[r] += 1;
+				}
+				else {
+					reg[r] += 2;	
+				}
+				{
+					
+				}
 			} //b_read
 			if ( r == 7 ) {
 			printf("#%o ", res.val);
@@ -147,34 +159,49 @@ Arg get_mr(word w) {
 	return res;
 }
 
+void get_flag_N(word w) {
+	flag_N = (w >> 14);
+}
+void get_flag_Z(word w) {
+	if (w == 0) {
+		flag_Z = 1;
+	}
+	else {
+		flag_Z = 0;
+	}
+}
+void get_flag_C(word w) {
+	flag_N = (w >> 15);
+}
+
 void do_mov() {
-	printf ("mov");
 	w_write(dd.adr, ss.val, way);
+	get_flag_N(ss.val);
+	get_flag_Z(ss.val);
+	get_flag_C(ss.val);	
 }
 
 void do_movb() {
-	printf ("movb");
 	b_write(dd.adr, ss.val, way);	
 }
 
 void do_add() {
-    printf ("add");
     dd.val = ss.val + dd.val;
     w_write(dd.adr, dd.val, way);
+	get_flag_N(dd.val);
+	get_flag_Z(dd.val);
+	get_flag_C(dd.val);
 }
 
 void do_halt() {
-    printf ("THE END \n");
     	check_reg();
     exit (0);
 }
 void do_clear() {
-	printf ("clear");
 	w_write(dd.adr, 0, way);
 	}
 	
 void do_SOB() {
-	printf ("SOB %d %d", R, NN);
 	if ((--reg[R]) != 0) {	
 		pc = pc - NN*2;
 	}
