@@ -191,7 +191,10 @@ void do_mov() {
 }
 
 void do_movb() {
-	b_write(dd.adr, ss.val, way);	
+	b_write(dd.adr, ss.val, way);
+	get_flag_N(ss.val);
+	get_flag_Z(ss.val);
+	get_flag_C(ss.val);	
 }
 
 void do_add() {

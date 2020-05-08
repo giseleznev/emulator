@@ -34,28 +34,12 @@ typedef struct Arg {
 #define HAS_B 16
 #define HAS_XX 32
 
-#define NO_CH_N 0
-#define CH_N 1
-#define PUTS_1_N 2
-#define PUTS_0_N 3
-
-#define NO_CH_Z 0
-#define CH_Z 4
-#define PUTS_1_Z 8
-#define PUTS_0_Z 12
-
-#define NO_CH_C 0
-#define CH_C 16
-#define PUTS_1_C 32
-#define PUTS_0_C 48
-
 typedef struct {
     word mask;
     word opcore;
     char * name;
     void (*do_func) ();
     int params;
-    int PSW;
 } Command;
 
 Arg get_mr(word w);
