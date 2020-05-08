@@ -5,6 +5,7 @@ typedef unsigned char byte; // 8 bit
 typedef unsigned short int word; //16 bit
 typedef word adr; //16 bit
 
+
 #define MEMSIZE (64*1024)
 
 void b_write(adr adr, byte b);
@@ -26,9 +27,11 @@ typedef struct Arg {
 } Arg;
 
 #define NO_PARAMS 0
-#define HAS_SS 1*1
-#define HAS_DD 1*2
-#define HAS_SS_AND_DD (HAS_DD|HAS_SS)
+#define HAS_SS 1
+#define HAS_DD 2
+#define HAS_NN 4
+#define HAS_R 8
+
 
 typedef struct {
     word mask;
@@ -38,10 +41,12 @@ typedef struct {
     char params;
 } Command;
 
-Arg ss, dd;
-
 Arg get_mr(word w);
+int get_NN(word w);
+int get_R(word w);
 
 void do_mov();
 void do_add();
 void do_halt();
+void do_clear();
+void do_SOB();

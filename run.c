@@ -3,14 +3,19 @@
 #include <string.h>
 #include <stdlib.h>
 
-extern word reg[8];
-extern byte mem[MEMSIZE];
 #define pc reg[7]
 
+extern word reg[8];
+extern byte mem[MEMSIZE];
+extern Arg ss, dd;
+extern int NN, R;
+
 Command cmd[] = {
-        {0170000, 0000000, "halt", do_halt, HAS_SS_AND_DD},
-        {0170000, 0010000, "mov", do_mov, HAS_SS_AND_DD},
-        {0170000, 0060000, "add", do_add, HAS_SS_AND_DD},
+        {0170000, 0010000, "mov", do_mov, (HAS_SS|HAS_DD)},
+        {0170000, 0060000, "add", do_add, (HAS_SS|HAS_DD)},
+        {0177000, 0077000, "SOB", do_SOB, (HAS_R|HAS_NN)},
+        {0177700, 0005000, "clear", do_clear, (HAS_DD)},
+        {0170000, 0000000, "halt", do_halt, (NO_PARAMS)},
 };
 
 void load_file (char* path) {
@@ -74,8 +79,15 @@ void run () {
 				 if ((cmd[i].params) & (HAS_DD) ){
 					dd = get_mr(w);
 				 }
+				 if ((cmd[i].params) & (HAS_R) ){
+					R = get_R(w);
+				 }
+				 if ((cmd[i].params) & (HAS_NN) ){
+					NN = get_NN(w);
+				 }
                  cmd[i].do_func();
                  printf("\n");
+                 break;
             }
         }
     }
@@ -87,6 +99,8 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 	load_file(argv[1]);
+	mem_dump(0x0040, 0x000a); //
+	mem_dump(0x0200, 0x0012);
 	run();
 	return 0;
 }

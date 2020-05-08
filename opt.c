@@ -3,10 +3,16 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#define pc reg[7]
+
 word reg[8];
 byte mem[MEMSIZE];
 
 int way = to_mem;
+
+
+Arg ss, dd;
+int NN, R;
 
 void test_mem () {
     byte b0 = 0x0a;
@@ -67,6 +73,16 @@ void check_reg() {
     }
 }
 
+int get_NN(word w){
+	NN = w & 077;
+	return NN;
+}
+
+int get_R(word w){
+	R = (w >> 6) & 07;
+	return R;
+}
+
 Arg get_mr(word w) {
 	Arg res;
 	int r = w & 7;
@@ -119,4 +135,15 @@ void do_halt() {
     printf ("THE END \n");
     	check_reg();
     exit (0);
+}
+void do_clear() {
+	printf ("clear");
+	w_write(dd.adr, 0, way);
+	}
+	
+void do_SOB() {
+	printf ("SOB %d %d", R, NN);
+	if ((--reg[R]) != 0) {	
+		pc = pc - NN*2;
+	}
 }
