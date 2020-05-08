@@ -8,7 +8,7 @@
 extern word reg[8];
 extern byte mem[MEMSIZE];
 extern Arg ss, dd;
-extern int NN, R, B;
+extern int NN, R, B, XX;
 extern char flag_C, flag_N, flag_Z;
 
 Command cmd[] = {
@@ -16,9 +16,10 @@ Command cmd[] = {
         {0170000, 0110000, "movb", do_movb, (HAS_B|HAS_SS|HAS_DD), (CH_N|CH_Z|CH_C)},
         {0170000, 0060000, "add", do_add, (HAS_SS|HAS_DD), (CH_N|CH_Z|CH_C)},
         {0177000, 0077000, "SOB", do_SOB, (HAS_R|HAS_NN), (NO_CH_N|NO_CH_Z|NO_CH_C)},
-        {0177700, 0005000, "clear", do_clear, (HAS_DD), (NO_CH_N|NO_CH_Z|NO_CH_C)},
+        {0177700, 0005000, "clear", do_clear, (HAS_DD), (CH_N|CH_Z|CH_C)},
+        {0177400, 0000400, "br", do_br, (HAS_XX), (NO_CH_N|NO_CH_Z|NO_CH_C)},
+        {0177400, 0001400, "beq", do_beq, (HAS_XX), (NO_CH_N|NO_CH_Z|NO_CH_C)},
         {0170000, 0000000, "halt", do_halt, (NO_PARAMS), (NO_CH_N|NO_CH_Z|NO_CH_C)},
-        
 };
 
 void load_file (char* path) {
@@ -74,7 +75,7 @@ void run () {
         word w = w_read(pc);
         printf ("%06o %06o: ", pc, w); // шесть восьмеричных значений   машинное слово: 0.100 .000.0 00.00 0.000
         pc += 2;
-   //     check_reg();
+   //    check_reg();
         for (unsigned int i = 0; i < sizeof(cmd)/sizeof(cmd[0]); i++ ) {
              if ( (w & cmd[i].mask) == cmd[i].opcore) {
 				 printf("%s ", cmd[i].name);
@@ -92,6 +93,9 @@ void run () {
 				 }
 				 if ((cmd[i].params) & (HAS_NN) ){
 					NN = get_NN(w);
+				 }
+				 if ((cmd[i].params) & (HAS_XX) ){
+					XX = get_XX(w);
 				 }
                  cmd[i].do_func();
                  printf("\n");

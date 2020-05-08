@@ -32,6 +32,7 @@ typedef struct Arg {
 #define HAS_NN 4
 #define HAS_R 8
 #define HAS_B 16
+#define HAS_XX 32
 
 #define NO_CH_N 0
 #define CH_N 1
@@ -60,6 +61,7 @@ typedef struct {
 Arg get_mr(word w);
 int get_NN(word w);
 int get_R(word w);
+int get_XX(word w);
 
 void do_mov();
 void do_movb();
@@ -67,3 +69,5 @@ void do_add();
 void do_halt();
 void do_clear();
 void do_SOB();
+void do_br();
+void do_beq();

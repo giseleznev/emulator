@@ -11,10 +11,12 @@ byte mem[MEMSIZE];
 
 int way = to_mem;
 
-
 Arg ss, dd;
+
+int XX;
 int NN, R;
 int B = 0;
+
 char flag_N = 0;
 char flag_Z = 0;
 char flag_C = 0;
@@ -158,7 +160,14 @@ Arg get_mr(word w) {
 	}
 	return res;
 }
-
+int get_XX(word w) {
+	if ((w >> 7) & 01) {
+		return -(0400 - (w & 0377));
+	}
+	else {
+		return (w & 0377);
+	}
+}
 void get_flag_N(word w) {
 	flag_N = (w >> 14);
 }
@@ -199,10 +208,27 @@ void do_halt() {
 }
 void do_clear() {
 	w_write(dd.adr, 0, way);
-	}
+	get_flag_N(0);
+	get_flag_Z(0);
+	get_flag_C(0);
+}
 	
 void do_SOB() {
 	if ((--reg[R]) != 0) {	
 		pc = pc - NN*2;
+	}
+}
+void do_br() {
+	printf("%d", XX);
+	if (XX){
+		pc = pc + XX*2;
+	}
+	else {
+		pc = pc - XX*2;
+	}
+}
+void do_beq(){
+	if (flag_Z) {
+		do_br();
 	}
 }
