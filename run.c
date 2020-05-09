@@ -4,14 +4,14 @@
 #include <stdlib.h>
 
 #define pc reg[7]
-#define odata 0177566 
-#define ostat 0177564
+
 
 extern word reg[8];
 extern byte mem[MEMSIZE];
 extern Arg ss, dd;
 extern int NN, R, B, XX;
 extern char flag_C, flag_N, flag_Z;
+extern FILE* print_file;
 
 Command cmd[] = {
         {0170000, 0010000, "mov", do_mov, (HAS_SS|HAS_DD)},
@@ -111,11 +111,12 @@ void run () {
 
 int main(int argc, char **argv) {
 	mem[ostat] = 0377;
-	if(argv[1] == NULL){
-		printf("Invalid command! \nput the file path after programm name\nwrite: ./programme path to a file \n");
+	if(argv[2] == NULL ||argv[1] == NULL){
+		printf("Invalid command! \nput the file path after programm name \nwrite: ./programme path_to_a_file_to_read path_to_a_file_to_print \n");
 		return 1;
 	}
 	load_file(argv[1]);
+	print_file = fopen(argv[2], "w");
 	mem_dump(0x200, 0x010);
 	run();
 	return 0;

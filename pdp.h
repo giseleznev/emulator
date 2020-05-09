@@ -5,8 +5,10 @@ typedef unsigned char byte; // 8 bit
 typedef unsigned short int word; //16 bit
 typedef word adr; //16 bit
 
-
 #define MEMSIZE (64*1024)
+
+#define odata 0177566 
+#define ostat 0177564
 
 void b_write(adr adr, byte b, int way);
 byte b_read(adr adr);

@@ -8,6 +8,8 @@
 word reg[8];
 byte mem[MEMSIZE];
 
+FILE* print_file;
+
 int way = to_mem;
 
 Arg ss, dd;
@@ -67,7 +69,10 @@ word w_read (adr adr) {
 
 void b_write(adr adr, byte b, int way){
     if (way) {
-		mem[adr] = b;
+		mem[adr] = b;	
+		if (adr == odata) {
+			putc(b, print_file);
+		}
 	}
 	if (!way) {
 		if ((b >> 7)) {
