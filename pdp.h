@@ -55,3 +55,5 @@ void do_clear();
 void do_SOB();
 void do_br();
 void do_beq();
+void do_tstb();
+void do_bpl();

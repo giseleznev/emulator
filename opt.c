@@ -5,7 +5,6 @@
 
 #define pc reg[7]
 
-
 word reg[8];
 byte mem[MEMSIZE];
 
@@ -129,19 +128,16 @@ Arg get_mr(word w) {
 				reg[r] += 2;		
 			}
 			else {
-				res.val = b_read(res.adr);
-				if ((r != 6) && (r != 7)){
-					reg[r] += 1;
-				}
-				else {
-					reg[r] += 2;	
-				}
-				{
-					
-				}
+			res.val = b_read(res.adr);
+			if ((r != 6) && (r != 7)){
+				reg[r] += 1;
+			}
+			else {
+				reg[r] += 2;	
+			}
 			} //b_read
 			if ( r == 7 ) {
-			printf("#%o ", res.val);
+			printf("#%o ", r);
 		}	
 			else {
 			printf("(R%o)+ ", r);
@@ -149,10 +145,33 @@ Arg get_mr(word w) {
 			break;
 		case 3: //@(Rn)+
 			res.adr = reg[r];
-			res.adr= mem[res.adr];
+			res.adr= w_read(res.adr);
 			res.val = mem[res.adr];
 			reg[r] += 2;
+			if ( r == 7 ) {
+			printf("@#%o ", res.adr);
+			}	
+			else {
 			printf("@(R%o)+ ", r);
+			}
+			break;
+		case 4:
+			if (!B){
+				reg[r] -= 2;
+				res.adr = reg[r];
+				res.val = w_read(res.adr);		
+			}
+			else {
+			if ((r != 6) && (r != 7)){
+				reg[r] -= 1;
+			}
+			else {
+				reg[r] -= 2;	
+			}
+			res.adr = reg[r];
+			res.val = b_read(res.adr);
+			} 
+			printf("-(R%o) ", r);
 			break;	
 		default:
 			fprintf (stderr, "Mode %o NOT IMPLEMENTED yet!\n", m);
@@ -169,7 +188,10 @@ int get_XX(word w) {
 	}
 }
 void get_flag_N(word w) {
-	flag_N = (w >> 14);
+	flag_N = (w >> 15);
+}
+void get_flag_N_b(byte w) {
+	flag_N = (w >> 7);
 }
 void get_flag_Z(word w) {
 	if (w == 0) {
@@ -179,30 +201,59 @@ void get_flag_Z(word w) {
 		flag_Z = 0;
 	}
 }
-void get_flag_C(word w) {
-	flag_N = (w >> 15);
+void get_flag_Z_b(byte w) {
+	get_flag_Z(w);
+}
+void get_flag_C(word w1, word w2) {
+	int W1[17];
+	int W2[17];
+	for (int i = 0; i < 16; i++){
+		W1[i] = w1 >> i;
+		W2[i] = w2 >> i;
+	}
+	for (int i = 0; i< 16; i++){
+		if ((W1[i] + W2[i]) >=2 ){
+			W1[i+1] ++;
+		}
+	}
+	flag_N = (W1[16]);
+}
+void get_flag_C_b(byte b1, byte b2) {
+	int B1[9];
+	int B2[9];
+	for (int i = 0; i< 8; i++){
+		B1[i] = b1 >> i;
+		B2[i] = b2 >> i;
+	}
+	
+	for (int i = 0; i< 8; i++){
+		if ((B1[i] + B2[i]) >=2 ){
+			B1[i+1] ++;
+		}
+	}
+	flag_N = (B1[9]);
 }
 
 void do_mov() {
 	w_write(dd.adr, ss.val, way);
+	
 	get_flag_N(ss.val);
 	get_flag_Z(ss.val);
-	get_flag_C(ss.val);	
+		
 }
 
 void do_movb() {
 	b_write(dd.adr, ss.val, way);
 	get_flag_N(ss.val);
 	get_flag_Z(ss.val);
-	get_flag_C(ss.val);	
 }
 
 void do_add() {
+	get_flag_C(dd.val, ss.val);	
     dd.val = ss.val + dd.val;
     w_write(dd.adr, dd.val, way);
 	get_flag_N(dd.val);
 	get_flag_Z(dd.val);
-	get_flag_C(dd.val);
 }
 
 void do_halt() {
@@ -211,9 +262,9 @@ void do_halt() {
 }
 void do_clear() {
 	w_write(dd.adr, 0, way);
-	get_flag_N(0);
-	get_flag_Z(0);
-	get_flag_C(0);
+	flag_C = 0;
+	flag_N = 0;
+	flag_Z = 1;
 }
 	
 void do_SOB() {
@@ -234,4 +285,14 @@ void do_beq(){
 	if (flag_Z) {
 		do_br();
 	}
+}
+void do_bpl(){
+	if (!flag_N) {
+		do_br();
+	}
+}
+void do_tstb(){
+	get_flag_N_b(dd.val);
+	get_flag_Z_b(dd.val);
+	flag_C = 0;
 }

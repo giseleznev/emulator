@@ -4,6 +4,8 @@
 #include <stdlib.h>
 
 #define pc reg[7]
+#define odata 0177566 
+#define ostat 0177564
 
 extern word reg[8];
 extern byte mem[MEMSIZE];
@@ -19,6 +21,8 @@ Command cmd[] = {
         {0177700, 0005000, "clear", do_clear, (HAS_DD)},
         {0177400, 0000400, "br", do_br, (HAS_XX)},
         {0177400, 0001400, "beq", do_beq, (HAS_XX)},
+        {0177700, 0105700, "tstb", do_tstb, (HAS_DD)},
+        {0177400, 0100000, "bpl", do_bpl, (HAS_XX)},
         {0170000, 0000000, "halt", do_halt, (NO_PARAMS)},
 };
 
@@ -75,7 +79,7 @@ void run () {
         word w = w_read(pc);
         printf ("%06o %06o: ", pc, w); // шесть восьмеричных значений   машинное слово: 0.100 .000.0 00.00 0.000
         pc += 2;
-   //    check_reg();
+       //check_reg();
         for (unsigned int i = 0; i < sizeof(cmd)/sizeof(cmd[0]); i++ ) {
              if ( (w & cmd[i].mask) == cmd[i].opcore) {
 				 printf("%s ", cmd[i].name);
@@ -106,11 +110,13 @@ void run () {
 }
 
 int main(int argc, char **argv) {
+	mem[ostat] = 0377;
 	if(argv[1] == NULL){
 		printf("Invalid command! \nput the file path after programm name\nwrite: ./programme path to a file \n");
 		return 1;
 	}
 	load_file(argv[1]);
+	mem_dump(0x200, 0x010);
 	run();
 	return 0;
 }
