@@ -71,7 +71,7 @@ void b_write(adr adr, byte b, int way){
     if (way) {
 		mem[adr] = b;	
 		if (adr == odata) {
-			putc(b, print_file);
+			fprintf(print_file, "%c", b);
 		}
 	}
 	if (!way) {
@@ -85,7 +85,12 @@ void b_write(adr adr, byte b, int way){
 }
 
 byte b_read(adr adr){
-    return mem[adr];
+	if (way) {
+		return mem[adr];
+	}
+	else {
+		return (0377 & reg[adr]);
+	}
 }
 
 void check_reg() {
@@ -93,6 +98,10 @@ void check_reg() {
         printf(" R%d, %06ho ", i, reg[i]);
     }
 }
+void check_flag() {
+	printf("N %d Z %d V  C%d ", flag_N, flag_Z, flag_C);
+}
+
 
 int get_NN(word w){
 	NN = w & 077;
@@ -101,6 +110,7 @@ int get_NN(word w){
 
 int get_R(word w){
 	R = (w >> 6) & 07;
+	printf("R%o ", R);
 	return R;
 }
 
@@ -140,18 +150,19 @@ Arg get_mr(word w) {
 			else {
 				reg[r] += 2;	
 			}
+			
 			} //b_read
 			if ( r == 7 ) {
-			printf("#%o ", r);
-		}	
+				printf("#%06o ", res.val);
+			}	
 			else {
-			printf("(R%o)+ ", r);
-		}
+				printf("(R%o)+ ", r);
+			}
 			break;
 		case 3: //@(Rn)+
 			res.adr = reg[r];
-			res.adr= w_read(res.adr);
-			res.val = mem[res.adr];
+			res.adr = w_read(res.adr);
+			res.val = w_read(res.adr);
 			reg[r] += 2;
 			if ( r == 7 ) {
 			printf("@#%o ", res.adr);
@@ -184,12 +195,18 @@ Arg get_mr(word w) {
 	}
 	return res;
 }
-int get_XX(word w) {
+void get_XX(word w) {
 	if ((w >> 7) & 01) {
-		return -(0400 - (w & 0377));
+		XX = -(0400 - (w & 0377));
 	}
 	else {
-		return (w & 0377);
+		XX = (w & 0377);
+	}
+	if (XX){
+		printf("%06o", pc + XX*2);
+	}
+	else {
+		printf("%06o", pc - XX*2);
 	}
 }
 void get_flag_N(word w) {
@@ -223,6 +240,7 @@ void get_flag_C(word w1, word w2) {
 	}
 	flag_N = (W1[16]);
 }
+
 void get_flag_C_b(byte b1, byte b2) {
 	int B1[9];
 	int B2[9];
@@ -276,9 +294,9 @@ void do_SOB() {
 	if ((--reg[R]) != 0) {	
 		pc = pc - NN*2;
 	}
+	printf (" %06o", pc);
 }
 void do_br() {
-	printf("%d", XX);
 	if (XX){
 		pc = pc + XX*2;
 	}
@@ -300,4 +318,21 @@ void do_tstb(){
 	get_flag_N_b(dd.val);
 	get_flag_Z_b(dd.val);
 	flag_C = 0;
+}
+void do_ash(){
+	if (!(dd.val >> 15)) {
+		reg[R] = reg[R] << dd.val;
+		get_flag_C(R, 0);
+	}
+	else {
+		reg[R] = reg[R] >> (0200000-dd.val);
+		flag_C = 0;
+	}
+	get_flag_N(dd.val);
+	get_flag_Z(dd.val);
+}
+void do_bic() {
+	reg[dd.adr] = reg[dd.adr] & (~ss.val);
+	get_flag_Z(dd.val);
+	get_flag_N(dd.val);
 }

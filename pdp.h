@@ -21,7 +21,7 @@ void test_mem();
 
 
 void check_reg();
-
+void check_flag();
 
 typedef struct Arg {
     word val;
@@ -47,7 +47,7 @@ typedef struct {
 Arg get_mr(word w);
 int get_NN(word w);
 int get_R(word w);
-int get_XX(word w);
+void get_XX(word w);
 
 void do_mov();
 void do_movb();
@@ -59,3 +59,6 @@ void do_br();
 void do_beq();
 void do_tstb();
 void do_bpl();
+void do_ash();
+void do_bic();
+

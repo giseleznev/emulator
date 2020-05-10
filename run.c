@@ -23,6 +23,8 @@ Command cmd[] = {
         {0177400, 0001400, "beq", do_beq, (HAS_XX)},
         {0177700, 0105700, "tstb", do_tstb, (HAS_DD)},
         {0177400, 0100000, "bpl", do_bpl, (HAS_XX)},
+        {0177000, 0072000, "ash", do_ash, (HAS_R|HAS_DD)},
+        {0170000, 0040000, "bic", do_bic, (HAS_SS|HAS_DD)},
         {0170000, 0000000, "halt", do_halt, (NO_PARAMS)},
 };
 
@@ -79,27 +81,31 @@ void run () {
         word w = w_read(pc);
         printf ("%06o %06o: ", pc, w); // шесть восьмеричных значений   машинное слово: 0.100 .000.0 00.00 0.000
         pc += 2;
-       //check_reg();
+     //   check_reg();
+	 //	  check_flag();
         for (unsigned int i = 0; i < sizeof(cmd)/sizeof(cmd[0]); i++ ) {
              if ( (w & cmd[i].mask) == cmd[i].opcore) {
 				 printf("%s ", cmd[i].name);
 				 if ((cmd[i].params) & (HAS_B)) {
 					B = 1;
 				 }
+				 else {
+					B = 0;
+				 }
 				 if ((cmd[i].params) & (HAS_SS)) {
 					ss = get_mr(w >> 6);	
 				 }
-				 if ((cmd[i].params) & (HAS_DD) ){
-					dd = get_mr(w);
-				 }
 				 if ((cmd[i].params) & (HAS_R) ){
 					R = get_R(w);
+				 }
+				 if ((cmd[i].params) & (HAS_DD) ){
+					dd = get_mr(w);
 				 }
 				 if ((cmd[i].params) & (HAS_NN) ){
 					NN = get_NN(w);
 				 }
 				 if ((cmd[i].params) & (HAS_XX) ){
-					XX = get_XX(w);
+					get_XX(w);
 				 }
                  cmd[i].do_func();
                  printf("\n");
@@ -117,7 +123,12 @@ int main(int argc, char **argv) {
 	}
 	load_file(argv[1]);
 	print_file = fopen(argv[2], "w");
-	mem_dump(0x200, 0x010);
+	if (print_file == NULL) {
+        perror(argv[2]);
+        exit(2);
+    }
+    mem_dump(0x080, 0x029);
+	mem_dump(0x200, 0x02e);
 	run();
 	return 0;
 }
